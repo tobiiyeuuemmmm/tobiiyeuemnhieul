@@ -707,7 +707,7 @@ lon.TextSize = 25
 lon.Text = 'RUNNN '
 lon.TextColor3 = Color3.fromRGB(0,255,0)
 lon.Size = UDim2.new(1,0,1,5,0)
-repeat wait(10) until game:IsLoaded()
+repeat wait(5) until game:IsLoaded()
 
 
 
