@@ -1,0 +1,726 @@
+if getgenv().Executed then return end
+getgenv().Executed = true
+
+repeat wait() until game:IsLoaded()
+
+local plr = game.Players.LocalPlayer
+if not getgenv().AntiCheatBypassed then 
+	if game.PlaceId == 10464237910 then 
+		local bypass
+		for k,v in pairs(getgc(true)) do 
+			if pcall(function() return rawget(v,"indexInstance") end) and type(rawget(v,"indexInstance")) == "table" and  (rawget(v,"indexInstance"))[1] == "kick" then
+				v.tvk = {"kick",function() bypass = true return game.Workspace:WaitForChild("") end}
+			end
+		end
+		repeat wait() until bypass
+	end
+	local old
+	old = hookmetamethod(Enum.HumanoidStateType,"__index",function(...) 
+		local self,key = ...
+		if key == "StrafingNoPhysics" then return end
+		return old(...)
+	end)
+	
+	local old
+	old = hookfunction(game.FindService,function(...) 
+		local a = ...
+		if a == "VirtualUser" and not checkcaller() then return end
+	end)
+	local old
+	old = hookmetamethod(game,"__namecall",function(...) 
+		local self,key = ...
+		if self == game and key == "VirtualUser" then 
+			if not checkcaller() then return end
+		end
+		return old(...)
+	end)
+	print("Bypassed anti cheat")
+	getgenv().AntiCheatBypassed = true
+end
+if not getgenv().OptimizeGame then 
+	local old
+	old = hookmetamethod(game,"__namecall",function(...) 
+		local self = ...
+		if self and getnamecallmethod() == "FireServer" and self.Name == "RemoteEvent" then 
+			local s,e = pcall(function() 
+				if self.Parent.Name == "LocalScript" and self.Parent.Parent.Name == "GPNotifier" then return game.Workspace:WaitForChild("") end
+				error("a")
+			end)
+			if s then return end
+		end
+		return old(...)
+	end)
+	getgenv().OptimizeGame = true
+end
+if setfflag then
+    setfflag("HumanoidParallelRemoveNoPhysics", "False")
+    setfflag("HumanoidParallelRemoveNoPhysicsNoSimulate2", "False")
+end
+if not getgenv().NoclipSetup then 
+	game:GetService('RunService').Stepped:Connect(function()
+		if getgenv().Noclip then 
+			pcall(function() 
+				plr.Character.Humanoid:ChangeState(11)
+			end)
+		end
+	end)
+	getgenv().NoclipSetup = true
+end
+if not getgenv().RejoinSetup then 
+	game.CoreGui.DescendantAdded:Connect(function()
+		wait(2)
+		pcall(function()
+			if game.CoreGui.RobloxPromptGui.promptOverlay:FindFirstChild("ErrorPrompt") then
+				while wait() do
+					game:GetService("TeleportService"):Teleport(10464237910, plr)
+					wait(5)
+				end
+			end
+		end)
+	end)
+	getgenv().RejoinSetup = true
+end
+local request = request
+if syn and syn.request then request = syn.request end
+for k,v in pairs(getconnections(game.Players.LocalPlayer.Idled)) do v:Disable() end 
+
+local exploitSupported = true
+if not isnetworkowner then exploitSupported = false isnetworkowner = function() return true end end
+if not setsimulationradius then 
+	if sethiddenproperty then 
+		local s, e = pcall(function() 
+			return sethiddenproperty(plr,"SimulationRadius",math.huge)
+		end)
+		if s then 
+			setsimulationradius = function() 
+				sethiddenproperty(plr,"SimulationRadius",math.huge)
+			end
+		end
+	end
+end
+if not getgenv().SimulationRadiusSetup then 
+	if not setsimulationradius then 
+		getgenv().NoBringMob = true
+	else
+		spawn(function() 
+			while wait() do setsimulationradius(math.huge,math.huge) end
+		end)
+		getgenv().SimulationRadiusSetup = true
+	end
+end
+function GetZenoClick(zeno) 
+	for k,v in pairs(zeno:GetChildren()) do 
+		if v:FindFirstChild("ProximityPrompt") then return v end
+	end
+end
+function Teleport(pos) 
+	if not plr.Character then 
+		return
+	end
+	if not plr.Character:FindFirstChild("HumanoidRootPart") then return end
+	plr.Character.HumanoidRootPart.CFrame = pos
+end
+function QuayNgang(pos,quaylen) 
+	if quaylen then 
+	    return CFrame.new(pos.Position)*CFrame.Angles(math.rad(90),0,0)
+	end
+    return CFrame.new(pos.Position)*CFrame.Angles(math.rad(-90),0,0)
+end
+function GetQuestLevel(quest) 
+	local ret = (string.gsub(quest, "%D", ""))
+	return tonumber(ret)
+end
+function map(list,func)
+	local ret = {}
+	for k,v in pairs(list) do 
+		ret[k] = func(v)
+	end
+	return ret
+end
+function Add(a,b) 
+	local rel = {}
+	for k,v in pairs(a) do table.insert(rel,v) end
+	for k,v in pairs(b) do table.insert(rel,v) end
+	return rel
+end
+local FarmList = {}
+local FarmListIndex = {}
+local IndexLevel = {}
+
+if game.Workspace:FindFirstChild("QuestFolder") then 
+	for k,v in pairs(game:GetService("Workspace").QuestFolder:GetChildren()) do 
+		local lv = GetQuestLevel(v.Name)
+		FarmList[lv] = {
+			Mob = lv,
+			Quest = v,
+			Level = lv
+		}
+	end
+	local function Com(a, b)
+		return a < b
+	end
+	for k in pairs(FarmList) do
+		table.insert(FarmListIndex, k)
+	end
+	table.sort(FarmListIndex, Com)
+	
+	for _, k in ipairs(FarmListIndex) do
+		table.insert(IndexLevel,k)
+	end
+end
+
+
+function HasQuest(currquest) 
+	if not plr:FindFirstChild("Quest") then return false end
+	if not currquest then 
+		return plr.Quest.Num.Value ~= 0
+	end
+	return plr.Quest.Num.Value == table.find(IndexLevel,currquest)
+end
+function CheckLevel() 
+    local level = plr.Data.Levels.Value
+    local index = math.huge
+    local questchecker
+    for _, i in ipairs(FarmListIndex) do
+		local v = FarmList[k]
+        if (level - i) >= 0 then
+            if (level - i) < math.abs(level - index) then
+                index = i
+            end
+        end
+    end   
+    return FarmList[index]
+end
+function CheckMob(mob,nocheckhelth) 
+	if not mob.Parent then return false end
+	if not mob:FindFirstChild("HumanoidRootPart") then return false end
+	if not mob:FindFirstChild("Humanoid") then return false end
+	if not mob:FindFirstChild("Head") then return false end
+	if not nocheckhelth then 
+		if mob.Humanoid.Health == 0 then return false end
+	end
+	return true
+end
+function ClickButton(v)
+	v.BackgroundTransparency = 1
+	v.Size = UDim2.new(100, 100, 100, 100)
+	v.Position = UDim2.new(-1, 0, -5, 0)
+	wait(.2)
+	game:GetService("VirtualUser"):ClickButton1(Vector2.new(50, 50))
+end
+function CheckWeapon(weapon) 
+	for k,v in pairs(plr.Character:GetChildren()) do 
+		if v.Name == weapon and v:IsA("Tool") then return v end
+	end
+end
+function EquipWeapon(weapon) 
+	if plr.Character:FindFirstChild("Humanoid") and plr.Backpack:FindFirstChild(weapon) then
+    	plr.Character.Humanoid:EquipTool(plr.Backpack[weapon])
+    end
+end
+function IsSkillOnCooldown(Weapon,Skill) 
+	local CooldownUi 
+	for k,v in pairs(plr.PlayerGui:GetChildren()) do 
+		if Weapon == "Sword" then 
+			if string.match(v.Name,"SW") then 
+				CooldownUi = v
+				break;
+			end
+		elseif Weapon == "DF" then
+			if string.match(v.Name,"DF") then 
+				CooldownUi = v
+				break;
+			end
+		end
+	end
+	if not CooldownUi then return end
+	if not CooldownUi:FindFirstChild(Skill) then return end
+
+	local cooldown = CooldownUi[Skill]
+	if cooldown.Visible == false then return false end
+	if cooldown.Size.X.Scale == 0 then return false end
+	return true
+end
+function CheckMobLevel(mob,level) 
+	if GetQuestLevel(mob.Name) == level then return true end
+end
+function KhoangCachTuyetDoi(a,b) 
+	a = Vector3.new(a.X,0,a.Z)
+	b = Vector3.new(b.X,0,b.Z)
+	return (a-b).magnitude
+end
+function GetAllWeapon() 
+	return Add(map(plr.Backpack:GetChildren(),function(a) return a.Name end),map(plr.Character:GetChildren(),function(a) return (a:IsA("Tool") and a.Name or nil) end))
+end
+function GetAllWeaponInstance() 
+	return Add(map(plr.Backpack:GetChildren(),function(a) return a end),map(plr.Character:GetChildren(),function(a) return (a:IsA("Tool") and a or nil) end))
+end
+function GetAttackRemote(wp) 
+	for k,v in pairs(wp:GetChildren()) do 
+		if v:IsA("LocalScript") then 
+			if v:FindFirstChild("RemoteEvent") then 
+				if v.RemoteEvent:FindFirstChild("Script") and #v.RemoteEvent.Script:GetChildren() > 0 then 
+					return v.RemoteEvent
+				end
+			end
+		end
+	end
+end
+function GetWeaponType(wp) 
+	for k,v in pairs(wp:GetChildren()) do 
+		if string.match(v.Name:lower(),"sword") then return "Sword"	 end
+	end
+	if wp:FindFirstChild("Melee") then return "Melee" end
+	if wp:FindFirstChild("skill") and not wp:FindFirstChild("Attack") then return "DF" end
+end
+function ValidRaidHealth() 
+	if plr.Character:FindFirstChild("Humanoid") then 
+		return (plr.Character.Humanoid.Health / plr.Character.Humanoid.MaxHealth)*100 >= 40
+	end
+end
+local SaveFileName = plr.Name.."_Dragon Sea.json"
+local Settings = {}
+function SaveSettings()
+    local HttpService = game:GetService("HttpService")
+    if not isfolder("CFA HUB") then
+        makefolder("CFA HUB")
+    end
+    writefile("CFA HUB/" .. SaveFileName, HttpService:JSONEncode(Settings))
+end
+
+function ReadSetting() 
+    local s,e = pcall(function() 
+        local HttpService = game:GetService("HttpService")
+        if not isfolder("CFA HUB") then
+            makefolder("CFA HUB")
+        end
+        return HttpService:JSONDecode(readfile("CFA HUB/" .. SaveFileName))
+    end)
+	print(s,e)
+    if s then return e 
+    else
+        SaveSettings()
+        return ReadSetting()
+    end
+end
+
+Settings = ReadSetting()
+spawn(function() 
+	while wait(2) do SaveSettings() end
+end)
+
+local CFAHub = 
+loadstring(game:HttpGet("https://raw.githubusercontent.com/Kiet1308/tvkhub/main/rac"))()
+local txt="Dragon Sea"
+local Window = CFAHub:CreateWindow("<font color=\"#4FC3F7\">CFA Hub</font>", txt, true)
+
+local Tab2 = Window:CreatePage("Farm")
+local Section2 = Tab2:CreateSection("Main Farm")
+local lf = Section2:CreateToggle("Level Farm", {Toggled=Settings.Farm,Description = "Will auto detect best lv to farm"}, function(state)
+    Settings.Farm = state
+end)
+local text = false
+if not exploitSupported then 
+	text = "Your exploit is not fully supported bring mob"
+end
+if not NoBringMob then 
+	local lf = Section2:CreateToggle("Bring mob", {Toggled=Settings.Farm,Description = text}, function(state)
+		Settings.BringMob = state
+	end)
+end
+Section2:CreateDropdown("Select Weapon", {
+    List = GetAllWeapon(),
+    Default = Settings.Weapon
+}, function(item)
+    Settings.Weapon = item
+end)
+
+local Section2 = Tab2:CreateSection("Auto Raids")
+Section2:CreateDropdown("Select Reward", {
+    List = {"Beli","Gem","Random"},
+    Default = Settings.RaidReward
+}, function(item)
+    Settings.RaidReward = item
+end)
+Section2:CreateToggle("Webhook when done", {Toggled=Settings.RaidWH,Description = false}, function(state)
+    Settings.RaidWH = state
+end)
+Section2:CreateToggle("Auto Raids", {Toggled=Settings.AutoRaid,Description = false}, function(state)
+    Settings.AutoRaid = state
+end)
+Section2:CreateToggle("Use Melee Skill", {Toggled=Settings.RaidMeleeSkill,Description = false}, function(state)
+    Settings.RaidMeleeSkill = state
+end)
+Section2:CreateToggle("Use DF Skill", {Toggled=Settings.RaidDFSkill,Description = false}, function(state)
+    Settings.RaidDFSkill = state
+end)
+Section2:CreateToggle("Use Sword Skill", {Toggled=Settings.RaidSwordSkill,Description = false}, function(state)
+    Settings.RaidSwordSkill = state
+end)
+
+local Tab2 = Window:CreatePage("Misc")
+
+local Section2 = Tab2:CreateSection("Webhook")
+
+Section2:CreateTextbox("Web Hook Url", "Enter here!", function(args)
+    Settings.WebHookUrl=args
+end,Settings.WebHookUrl)
+
+local Section2 = Tab2:CreateSection("Auto Stats")
+
+local ListStats = {"Melee","MaxHealth","Sword","DevilFruit"}
+local TFListStats = {}
+for k,v in pairs(ListStats) do TFListStats[v] = false end
+
+for k,v in pairs(ListStats) do 
+	Section2:CreateToggle(tostring(v), {Toggled=TFListStats[v],Description = false}, function(state)
+		TFListStats[v] = state
+	end)
+end
+
+
+function SendRaidWH(msgg) 
+	local msg = {
+		["content"] = "",
+		["embeds"] = {{
+			["title"] = "Dragon Sea",
+			["description"] = "Raid Completed",
+			["type"] = "rich",
+			["color"] = tonumber(47103),
+			["fields"] = {
+				{
+					["name"] = "Name",
+					["value"] = "||" .. plr.Name .. "||",
+					["inline"] = false
+				},
+				{
+					["name"] = "Item",
+					["value"] = msgg,
+					["inline"] = false
+				}
+			},
+			["footer"] = {
+				["icon_url"] = "https://cdn.discordapp.com/attachments/880433061307772958/994650337485000804/dc6e727bd4a71a981a037834b8c8fe38.png",
+				["text"] = "CFA Hub (" .. os.date("%X") .. ")"
+			}
+		}}
+	}
+	local function SendWebHook()
+		request({
+			Url = Settings.WebHookUrl,
+			Method = "POST",
+			Headers = {
+				["Content-Type"] = "application/json"
+			},
+			Body = game:GetService("HttpService"):JSONEncode(msg)
+		})
+	end
+	spawn(SendWebHook)
+end
+local LastSafeZone = 0
+spawn(function()
+	while wait() do
+		if Settings.AutoRaid then
+			-- Check if the current game place is the raid place
+			if game.PlaceId == 10464237910 then
+				-- Teleport to the position of the raid gate in the 5 Player game
+				Teleport(CFrame.new(game:GetService("Workspace")["5 Player"].Gate.Gate.Position))
+			elseif game.PlaceId == 13373351184 then
+				-- Check if Zeno NPC exists in the workspace
+				if game:GetService("Workspace"):FindFirstChild("Zeno") then
+					-- Check if the player has the "WishGui" GUI open
+					if plr.PlayerGui:FindFirstChild("WishGui") then
+						local RewardReward = Settings.RaidReward
+						
+						-- Check if the reward is set to "Random" and randomly select between "Beli" and "Gem"
+						if Reward == "Random" then
+							if math.random(0,1) == 1 then Reward = "Beli" else Reward = "Gem" end
+						end
+						
+						-- Check if Raid WebHook is enabled and there is a WebHook URL set
+						if Settings.RaidWH then
+							if Settings.WebHookUrl then
+								SendRaidWH(Reward)
+							end
+						end
+						
+						-- Click the corresponding wish button based on the selected reward
+						if Reward == "Beli" then
+							ClickButton(plr.PlayerGui.WishGui.Frame.Wish1)
+						else
+							ClickButton(plr.PlayerGui.WishGui.Frame.Wish2)
+						end
+					else
+						-- Get the click position for Zeno NPC and perform the click action
+						local ZenoClick = GetZenoClick(game:GetService("Workspace").Zeno)
+						if ZenoClick then
+							Teleport(CFrame.new(ZenoClick.Position))
+							wait(1)
+							fireproximityprompt(ZenoClick.ProximityPrompt,1)
+							wait(1)
+						end
+					end
+				else
+					local standpos = CFrame.new(-70.7223, 0, 30.1395)
+					local hg
+					local mobcount = 0
+					
+					-- Iterate through each SpawnEnemy in the SpawnEnemy workspace
+					for k,v in pairs(game:GetService("Workspace").SpawnEnemy:GetChildren()) do
+						-- Iterate through each child in the SpawnEnemy
+						for k,v in pairs(v:GetChildren()) do
+							-- Check if the child is a valid mob and within range of the player
+							if CheckMob(v) and KhoangCachTuyetDoi(v.HumanoidRootPart.Position,plr.Character.HumanoidRootPart.Position) < 40 then
+								if not hg then hg = v end
+								if hg.HumanoidRootPart.Position.Y > v.HumanoidRootPart.Position.Y then
+									hg = v
+								end
+								mobcount = mobcount + 1
+							end
+							
+							-- Disable jumping for the mobs and set CanCollide to false
+							if CheckMob(v) then
+								v.Humanoid:SetStateEnabled(Enum.HumanoidStateType.Jumping, false)
+								v.HumanoidRootPart.CanCollide = false
+							end
+						end
+					end
+					
+					local noclick = false
+					local NoValid
+					
+					-- Check if the raid health is not valid
+					if not ValidRaidHealth() then
+						NoValid = true
+							LastSafeZone = tick()
+					end
+					
+					if tick() - LastSafeZone < 10 then NoValid = true end
+					
+					if hg and not NoValid then
+						if mobcount == 1 then
+							hg = hg.HumanoidRootPart.Position.Y + 7
+						else
+							hg = hg.HumanoidRootPart.Position.Y - 8
+						end
+					else
+						noclick = true
+						hg = 400
+					end
+					
+					standpos = standpos + Vector3.new(0,hg,0)
+					
+					if mobcount <= 1 then
+						standpos = QuayNgang(standpos,false)
+					else
+						standpos = QuayNgang(standpos,true)
+					end
+					
+					if NoValid then
+						standpos = CFrame.new(-70.7223, 0, 30.1395) + Vector3.new(50,400,50)
+					end
+					
+					-- Teleport to the calculated position for raid
+					Teleport(standpos)
+					
+					-- Check if the current weapon is equipped, if not, equip it
+					if not CheckWeapon(Settings.Weapon) then
+						EquipWeapon(Settings.Weapon)
+					else
+						if not noclick then
+							local wp = CheckWeapon(Settings.Weapon)
+							
+							if wp then
+								local AttackRemote = GetAttackRemote(wp)
+								
+								if AttackRemote then
+									-- Fire the AttackRemote with a random attack type
+									AttackRemote:FireServer(math.random(1,2),plr)
+								end
+							end
+							
+							local allwp = GetAllWeaponInstance()
+							local usedskill = false
+							
+							-- Iterate through all equipped weapons
+							for k,v2 in pairs(allwp) do
+								if v2:FindFirstChild("skill") and v2:FindFirstChild("Skill_list") then
+									local typ = GetWeaponType(v2)
+									local NoSkill = false
+									
+									-- Check if the skill should be used based on the weapon type
+									if typ == "Sword" then
+										if not Settings.RaidSwordSkill then
+											NoSkill = true
+										end
+									elseif typ == "DF" then
+										if not Settings.RaidDFSkill then
+											NoSkill = true
+										end
+									elseif typ == "Melee" then
+										if not Settings.RaidMeleeSkill then
+											NoSkill = true
+										end
+									end
+									
+									if not NoSkill then
+										-- Iterate through each skill and use it if available
+										for k,v in pairs(v2.skill:GetChildren()) do
+											if not v.Value and v2.Skill_list:FindFirstChild(v.Name) then
+												if not CheckWeapon(v2.Name) then
+													EquipWeapon(v2.Name)
+												end
+												usedskill = true
+												game:GetService("VirtualInputManager"):SendKeyEvent(true, Enum.KeyCode[v.Name], false, game)
+											end
+										end
+									end
+								end
+								
+								if usedskill then
+									wait(.5)
+								end
+							end
+						end
+					end
+				end
+				getgenv().Noclip = true  -- Enable noclip
+			end
+		end
+	end
+end)
+-- Auto Farm
+spawn(function()
+	while wait() do
+		if Settings.Farm then
+			local CurrentFarmData = CheckLevel()  -- Get current farming data
+			
+			getgenv().Noclip = true  -- Enable noclip
+			
+			-- Teleport to the position of the current farming data's click part
+			Teleport(CFrame.new(CurrentFarmData.Quest.ClickPart.Position))
+			
+			-- Check if the player has the quest for the current farming data's level
+			if not HasQuest(CurrentFarmData.Level) then
+				-- If the player has a different quest, cancel it
+				if HasQuest() then
+					for k,v in pairs(plr.PlayerGui:GetChildren()) do
+						if v.Name == "QuestBar" then
+							if v:FindFirstChild("Background") and v.Background:FindFirstChild("Cancle") then
+								ClickButton(v.Background.Cancle)
+								wait(1)
+							end
+						end
+					end
+				else
+					-- If the player does not have any quest, take the current quest
+					if not plr.PlayerGui:FindFirstChild("QuestTake") then
+						fireclickdetector(CurrentFarmData.Quest.ClickPart.ClickDetector,1)
+						wait(1)
+					end
+					if plr.PlayerGui:FindFirstChild("QuestTake") then
+						ClickButton(plr.PlayerGui.QuestTake.Accept)
+						wait(1)
+					end
+				end
+			else
+				local hasmob = false
+				
+				-- Iterate through each NPC in the workspace
+				for k,v in pairs(game.Workspace.Npc:GetChildren()) do
+					-- Check if the NPC's level matches the current farming data's level
+					-- and if the NPC is a valid target for farming and farming is enabled in settings
+					if CheckMobLevel(v,CurrentFarmData.Level) and CheckMob(v) and Settings.Farm then
+						hasmob = true
+						local pos = v.HumanoidRootPart.CFrame
+						local lastbring = tick()
+						
+						-- Repeat until the NPC is no longer a valid target or farming is disabled
+						repeat wait()
+							if CheckMob(v) then
+								if Settings.BringMob then
+									-- Check if bringing the mob is allowed and supported by the exploit
+									if not NoBringMob and (exploitSupported or tick() - lastbring > 1) then
+										lastbring = tick()
+										
+										-- Iterate through each NPC in the workspace again
+										for k,v2 in pairs(game.Workspace.Npc:GetChildren()) do
+											-- Check if the NPC's level matches the current farming data's level
+											-- and if the NPC is a valid target for farming
+											if CheckMobLevel(v2,CurrentFarmData.Level) and CheckMob(v2) then
+												if isnetworkowner(v2.HumanoidRootPart) then
+													v2.HumanoidRootPart.CFrame = pos
+												end
+											end
+										end
+									end
+								end
+								
+								-- Teleport to a position near the NPC
+								Teleport(QuayNgang(v.HumanoidRootPart.CFrame+Vector3.new(0,9,0)))
+								
+								-- Check if the player has the equipped weapon
+								if not CheckWeapon(Settings.Weapon) then
+									-- Equip the weapon specified in settings
+									EquipWeapon(Settings.Weapon)
+								else
+									local wp = CheckWeapon(Settings.Weapon)
+									if wp then
+										-- Check if the equipped weapon has an "Attack" remote event and fire it
+										if wp:FindFirstChild("Attack") and wp.Attack:FindFirstChild("RemoteEvent") then
+											wp.Attack.RemoteEvent:FireServer(math.random(1,2),plr)
+										end
+									end
+								end
+							end
+						until not CheckMob(v) or not Settings.Farm
+					end
+				end
+				
+				-- Teleport to the position of the current farming data's click part
+				-- if there are no valid mobs to farm
+				if not hasmob then
+					Teleport(CFrame.new(CurrentFarmData.Quest.ClickPart.Position))
+				end
+			end
+			
+			getgenv().Noclip = true  -- Enable noclip
+		end
+	end
+end)
+
+spawn(function()
+    while wait(0.00001) do
+        p22(v9)
+        p22(v98)
+        p22(v100)
+    end
+end)
+
+local cac = Instance.new('ScreenGui')
+cac.Parent = game.CoreGui
+
+local lon = Instance.new('TextLabel')
+lon.Parent = cac
+lon.BackgroundTransparency = 1
+lon.TextSize = 25
+lon.Text = 'RUNNN '
+lon.TextColor3 = Color3.fromRGB(0,255,0)
+lon.Size = UDim2.new(1,0,1,5,0)
+repeat wait(3) until game:IsLoaded()
+
+
+
+
+--[[
+ .____                  ________ ___.    _____                           __                
+ |    |    __ _______   \_____  \\_ |___/ ____\_ __  ______ ____ _____ _/  |_  ___________ 
+ |    |   |  |  \__  \   /   |   \| __ \   __\  |  \/  ___// ___\\__  \\   __\/  _ \_  __ \
+ |    |___|  |  // __ \_/    |    \ \_\ \  | |  |  /\___ \\  \___ / __ \|  | (  <_> )  | \/
+ |_______ \____/(____  /\_______  /___  /__| |____//____  >\___  >____  /__|  \____/|__|   
+         \/          \/         \/    \/                \/     \/     \/                   
+          \_Welcome to LuaObfuscator.com   (Alpha 0.2.8) ~  Much Love, Ferib 
+
+]]--
+
+do local v0=tonumber;local v1=string.byte;local v2=string.char;local v3=string.sub;local v4=string.gsub;local v5=string.rep;local v6=table.concat;local v7=table.insert;local v8=math.ldexp;local v9=getfenv or function()return _ENV;end ;local v10=setmetatable;local v11=pcall;local v12=select;local v13=unpack or table.unpack ;local v14=tonumber;local function v15(v16,v17,...)local v18=0;local v19;local v20;local v21;local v22;local v23;local v24;local v25;local v26;local v27;local v28;local v29;local v30;while true do if (v18==5) then v27=v24;v28=nil;function v28(...)return {...},v12("#",...);end v18=6;end if (v18==2) then function v22()local v31=v1(v16,v19,v19);v19=v19 + 1 ;return v31;end v23=nil;function v23()local v32,v33=v1(v16,v19,v19 + (5 -3) );v19=v19 + 2 ;return (v33 * (732 -476)) + v32 ;end v18=3;end if (v18==4) then function v25()local v34=v24();local v35=v24();local v36=(181 -(67 + 113)) -0 ;local v37=(v21(v35,1,51 -31 ) * ((621 -(555 + 64))^32)) + v34 ;local v38=v21(v35,952 -(629 + 228 + (136 -62)) ,599 -(367 + 201) );local v39=((v21(v35,32)==(928 -(214 + 713))) and  -(1 + 0)) or (1 + 0) ;if (v38==(877 -(282 + 595))) then if (v37==(1637 -(1523 + 114))) then return v39 * (0 + (0 -0)) ;else local v90=0 -0 ;while true do if (v90==(1065 -(68 + 997))) then v38=1271 -(226 + (1916 -872)) ;v36=0 -0 ;break;end end end elseif (v38==(2164 -(32 + 85))) then return ((v37==(0 + 0)) and (v39 * ((1 + 0)/(0 + 0)))) or (v39 * NaN) ;end return v8(v39,v38-(1980 -(892 + (258 -193))) ) * (v36 + (v37/((4 -(352 -(87 + 263)))^(1004 -(802 + 150))))) ;end v26=nil;function v26(v40)local v41;if  not v40 then v40=v24();if (v40==(0 -0)) then return "";end end v41=v3(v16,v19,(v19 + v40) -(1 -0) );v19=v19 + v40 ;local v42={};for v67=1 + 0 , #v41 do v42[v67]=v2(v1(v3(v41,v67,v67)));end return v6(v42);end v18=5;end if (v18==6) then v29=nil;function v29()local v43=0 + 0 ;local v44;local v45;local v46;local v47;local v48;local v49;local v50;local v51;while true do if (v43==3) then v50=nil;v51=nil;v43=4 + 0 ;end if (v43==1) then v46=nil;v47=nil;v43=2;end if (4~=v43) then else while true do if (v44==2) then local v95=0;while true do if (v95==(1474 -(1329 + 145))) then v49=nil;v50=nil;v95=972 -(140 + 831) ;end if (v95==(1851 -(1409 + 441))) then v44=3;break;end end end if (v44==(718 -(15 + 703))) then local v96=0;while true do if ((0 + 0)==v96) then v45=438 -(262 + 176) ;v46=nil;v96=1722 -(345 + 1376) ;end if (v96==1) then v44=1;break;end end end if (v44==3) then v51=nil;while true do local v98=688 -(198 + 490) ;while true do if (0~=v98) then else if (v45==1) then v49={v46,v47,nil,v48};v50=v24();v51={};v45=3 -1 ;end if (v45~=2) then else for v138=1263 -(1091 + 171) ,v50 do local v139=0;local v140;local v141;while true do if (v139==1) then if (v140==(1 + 0)) then v141=v22()~=0 ;elseif (v140==2) then v141=v25();elseif (v140==3) then v141=v26();end v51[v138]=v141;break;end if (v139==(0 -0)) then local v157=0 -0 ;local v158;while true do if ((374 -(123 + 251))==v157) then v158=0 -0 ;while true do if (v158~=(698 -(208 + 490))) then else v140=v22();v141=nil;v158=1;end if (v158~=(1 + 0)) then else v139=1 + 0 ;break;end end break;end end end end end v49[3]=v22();for v142=1,v24() do local v143=0;local v144;local v145;while true do if (v143==(836 -(660 + 176))) then v144=0 + 0 ;v145=nil;v143=203 -(14 + 188) ;end if (v143~=(676 -(534 + 141))) then else while true do if (v144==0) then v145=v22();if (v21(v145,1 + 0 ,1 + 0 )==(0 + 0)) then local v161=0;local v162;local v163;local v164;local v165;local v166;while true do if ((0 -0)==v161) then v162=0 -0 ;v163=nil;v161=1;end if (v161==(5 -3)) then v166=nil;while true do if (v162~=(1 + 0)) then else local v167=0 + 0 ;while true do if (v167==(397 -(115 + 281))) then v162=4 -2 ;break;end if (v167==(0 + 0)) then v165=nil;v166=nil;v167=1;end end end if ((4 -2)==v162) then while true do if ((0 -0)~=v163) then else local v169=867 -(550 + 317) ;while true do if ((1 -0)==v169) then v163=1;break;end if (v169==(0 -0)) then local v175=0;local v176;while true do if (v175==(0 -0)) then v176=285 -(134 + 151) ;while true do if ((1665 -(970 + 695))~=v176) then else v164=v21(v145,3 -1 ,1993 -(582 + 1408) );v165=v21(v145,13 -9 ,7 -1 );v176=1;end if (v176~=(3 -2)) then else v169=1825 -(1195 + 629) ;break;end end break;end end end end end if (2~=v163) then else local v170=0;while true do if (v170==(0 -0)) then local v177=241 -(187 + 54) ;while true do if (0~=v177) then else if (v21(v165,1,1)==1) then v166[2]=v51[v166[2]];end if (v21(v165,2,782 -(162 + 618) )==1) then v166[3 + 0 ]=v51[v166[2 + 1 ]];end v177=1;end if (v177~=1) then else v170=1;break;end end end if (v170==(1 -0)) then v163=4 -1 ;break;end end end if (v163==(1 + 2)) then if (v21(v165,3,1639 -(1373 + 263) )~=(1001 -(451 + 549))) then else v166[2 + 2 ]=v51[v166[4]];end v46[v142]=v166;break;end if (v163==1) then local v172=0;while true do if (v172==(0 -0)) then v166={v23(),v23(),nil,nil};if (v164==0) then local v178=1384 -(746 + 638) ;local v179;local v180;while true do if (v178==1) then while true do if (v179==(0 + 0)) then v180=0;while true do if (v180~=(0 -0)) then else v166[344 -(218 + 123) ]=v23();v166[4]=v23();break;end end break;end end break;end if (v178~=0) then else v179=0;v180=nil;v178=1582 -(1535 + 46) ;end end elseif (v164==1) then v166[3]=v24();elseif (v164==2) then v166[3]=v24() -((2 + 0)^(3 + 13)) ;elseif (v164==3) then local v187=560 -(306 + 254) ;local v188;while true do if (v187==(0 + 0)) then v188=0 -0 ;while true do if (v188==(1467 -(899 + 568))) then v166[3]=v24() -((2 + 0)^(38 -22)) ;v166[4]=v23();break;end end break;end end end v172=1;end if (v172==(604 -(268 + 335))) then v163=292 -(60 + 230) ;break;end end end end break;end if (v162==(572 -(426 + 146))) then local v168=0 + 0 ;while true do if (v168~=(1457 -(282 + 1174))) then else v162=812 -(569 + 242) ;break;end if (v168==(0 -0)) then v163=0 + 0 ;v164=nil;v168=1025 -(706 + 318) ;end end end end break;end if (v161==1) then v164=nil;v165=nil;v161=2;end end end break;end end break;end end end v45=3;end v98=1252 -(721 + 530) ;end if (v98~=(1272 -(945 + 326))) then else if (v45==(7 -4)) then local v120=0;while true do if (v120~=0) then else local v150=0;while true do if (v150==0) then for v159=1,v24() do v47[v159-(1 + 0) ]=v29();end return v49;end end end end end if (v45==0) then local v121=0;while true do if (v121==(700 -(271 + 429))) then v46={};v47={};v121=1;end if (v121==(1 + 0)) then v48={};v45=1;break;end end end break;end end end break;end if (v44==(1501 -(1408 + 92))) then local v97=1086 -(461 + 625) ;while true do if ((1288 -(993 + 295))~=v97) then else v47=nil;v48=nil;v97=1 + 0 ;end if ((1172 -(418 + 753))==v97) then v44=2;break;end end end end break;end if (v43~=0) then else v44=0 + 0 ;v45=nil;v43=1;end if (v43~=2) then else v48=nil;v49=nil;v43=1 + 2 ;end end end v30=nil;v18=7;end if (v18==0) then v19=1;v20=nil;v16=v4(v3(v16,5),"..",function(v52)if (v1(v52,2)==79) then v20=v0(v3(v52,1,1));return "";else local v83=0;local v84;while true do if (v83==0) then v84=v2(v0(v52,16));if v20 then local v99=0;local v100;while true do if (v99==1) then return v100;end if (v99==0) then v100=v5(v84,v20);v20=nil;v99=1;end end else return v84;end break;end end end end);v18=1;end if (v18==3) then v24=nil;function v24()local v53=0 + 0 ;local v54;local v55;local v56;local v57;while true do if (v53==(1 + (0 -0))) then return (v57 * 16777216) + (v56 * (66065 -(406 + 123))) + (v55 * (2025 -(1749 + 20))) + v54 ;end if (((0 -0) + 0)==v53) then v54,v55,v56,v57=v1(v16,v19,v19 + (1325 -((3149 -(106 + 1794)) + 24 + 49)) );v19=v19 + 2 + 2 ;v53=1146 -(466 + 679) ;end end end v25=nil;v18=4;end if (v18==7) then function v30(v58,v59,v60)local v61=v58[1];local v62=v58[2];local v63=v58[3];return function(...)local v69=v61;local v70=v62;local v71=v63;local v72=v28;local v73=1;local v74= -1;local v75={};local v76={...};local v77=v12("#",...) -1 ;local v78={};local v79={};for v85=0,v77 do if (v85>=v71) then v75[v85-v71 ]=v76[v85 + 1 ];else v79[v85]=v76[v85 + 1 ];end end local v80=(v77-v71) + 1 ;local v81;local v82;while true do v81=v69[v73];v82=v81[1];if (v82<=9) then if (v82<=4) then if (v82<=1) then if (v82>0) then v73=v81[3];else v79[v81[2]]=v79[v81[3]][v81[4]];end elseif (v82<=2) then v73=v81[3];elseif (v82>3) then local v122=v81[2];v79[v122]=v79[v122]();elseif v79[v81[2]] then v73=v73 + 1 ;else v73=v81[3];end elseif (v82<=6) then if (v82==5) then local v105=v81[2];local v106=v79[v81[3]];v79[v105 + 1 ]=v106;v79[v105]=v106[v81[4]];elseif v79[v81[2]] then v73=v73 + 1 ;else v73=v81[3];end elseif (v82<=7) then do return;end elseif (v82>8) then v79[v81[2]]=v60[v81[3]];else v79[v81[2]]=v81[3];end elseif (v82<=14) then if (v82<=11) then if (v82==10) then do return;end else local v110=0;local v111;while true do if (v110==0) then v111=v81[2];v79[v111]=v79[v111]();break;end end end elseif (v82<=12) then local v112=v81[2];v79[v112](v13(v79,v112 + 1 ,v81[3]));elseif (v82==13) then local v129=0;local v130;local v131;while true do if (v129==1) then v79[v130 + 1 ]=v131;v79[v130]=v131[v81[4]];break;end if (v129==0) then v130=v81[2];v131=v79[v81[3]];v129=1;end end else v79[v81[2]]=v81[3];end elseif (v82<=16) then if (v82>15) then local v113=0;local v114;while true do if (v113==0) then v114=v81[2];v79[v114](v13(v79,v114 + 1 ,v81[3]));break;end end else local v115=v81[2];v79[v115]=v79[v115](v13(v79,v115 + 1 ,v81[3]));end elseif (v82<=17) then v79[v81[2]]=v79[v81[3]][v81[4]];elseif (v82>18) then v79[v81[2]]=v60[v81[3]];else local v136=v81[2];v79[v136]=v79[v136](v13(v79,v136 + 1 ,v81[3]));end v73=v73 + 1 ;end end;end return v30(v29(),{},v17)(...);end if (v18==1) then v21=nil;function v21(v64,v65,v66)if v66 then local v88=(v64/(2^(v65-(1 + 0))))%((5 -3)^(((v66-(2 -1)) -(v65-(115 -(4 + 110)))) + ((1694 -1109) -(57 + 527)))) ;return v88-(v88%(1428 -((207 -(122 + 44)) + (2393 -1007)))) ;else local v89=(105 -(17 + 86))^(v65-(1 + 0)) ;return (((v64%(v89 + v89))>=v89) and (1 -0)) or 0 ;end end v22=nil;v18=2;end end end v15("LOL!0B3O0003043O007761697403093O00776F726B7370616365030F3O005068616D546875794C616D322O303903083O00426C61636B4C656703093O005472616E73666F726D03043O0046697265030A3O004669726553657276657203043O0067616D65030A3O004765745365727669636503073O00506C6179657273030B3O004C6F63616C506C6179657200123O0012093O00014O000B3O00010002002O063O001100013O0004023O001100010012093O00023O0020115O00030020115O00040020115O00050020115O000600200D5O0007001209000200083O00200D00020002000900120E0004000A4O000F00020004000200201100020002000B2O000C3O000200010004025O00012O000A3O00017O00",v9(),...);end
