@@ -1,0 +1,58 @@
+_G.Team = "Marines"
+_G.FpsBoost = false
+_G.Webhook = "https://discord.com/api/webhooks/1130338504887521431/5X-ayF5oyEptaITXHcFLFDM0-1STRJOFQfdEJ8sCmEtueBeQ6cU0eDt5jDDwxrmmxpbM"
+
+getgenv().Chatkill = {
+    "I'm Using Synergy Hub", "No Skill? Use Synergy Hub now", "I got the Synergy Hub auto bounty script",
+    "hello i'm the founder of Synergy Hub"
+}
+getgenv().Region_Hop = {
+    ["Enable"] = true, -- true/false
+    ["Region"] = "Singapore"
+    --[[Singapore, United States, Germany, Japan, France, Australia, etc
+        - Singapore is the best choice for Asia
+    ]]
+}
+_G.Setting = {
+    ["Start Hunting"] = true, -- Bro wtf don't turn it off
+    ["Ken Haki"] = true,
+    ["WhiteScreen"] = true,
+    ["FruitStuff"] = true, -- Auto Buy and Store Fruits
+    ["Run"] = 3500, -- As the name, you'ly n-l run when the health below ...
+    ["MaxHealth"] = 5000,
+    ["Time&Bounty Counter"] = true,
+    ["Click Delay"] = 0,
+    ["SkipPlayerWhenBeingLowHealth"] = true,
+    ["Check"] = {
+        ["V4 Players"] = true,
+        ["Portal Users"] = true,
+        ["Buddha Users"] = false
+    },
+    ["Melee"] = {
+        ["Enable"] = true,
+        ["Z"] = {["Enable"] = true, ["HoldTime"] = 1.25},
+        ["X"] = {["Enable"] = true, ["HoldTime"] = 0},
+        ["C"] = {["Enable"] = true, ["HoldTime"] = 0}
+    },
+    ["Fruit"] = {
+        ["Enable"] = true,
+        ["Z"] = {["Enable"] = true, ["HoldTime"] = 1.5},
+        ["X"] = {["Enable"] = true, ["HoldTime"] = 0},
+        ["C"] = {["Enable"] = true, ["HoldTime"] = 0},
+        ["V"] = {["Enable"] = true, ["HoldTime"] = 0},
+        ["F"] = {["Enable"] = true, ["HoldTime"] = 0}
+    },
+    ["Sword"] = {
+        ["Enable"] = false,
+        ["Z"] = {["Enable"] = true, ["HoldTime"] = 0},
+        ["X"] = {["Enable"] = true, ["HoldTime"] = 0},
+    },
+    ["Gun"] = {
+        ["Enable"] = false,
+        ["GunMode"] = false,
+        ["Z"] = {["Enable"] = true, ["HoldTime"] = 0},
+        ["X"] = {["Enable"] = true, ["HoldTime"] = 0},
+    }
+}
+repeat wait() until game:IsLoaded()
+loadstring(game:HttpGet("https://raw.githubusercontent.com/clgtmm/AutoBounty/main/main.lua"))()
